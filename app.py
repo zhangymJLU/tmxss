@@ -2,7 +2,9 @@ __author__ = 'ym1ng'
 import tornado.ioloop
 import tornado.web
 
-def getKey(file = 'key.txt'):
+
+def getSecureKey(file = 'key.txt'):
+    #get the key to encrypt the cookies
     with open(file, 'r') as fd:
         key = fd.read()
     return key
@@ -28,7 +30,7 @@ class LoginHandler(BaseHandler):
 
 
 settings = {
-    'cookie_secret': getKey(),
+    'cookie_secret': getSecureKey(),
     'login_url': '/login'
 
 }
