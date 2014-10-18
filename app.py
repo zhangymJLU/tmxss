@@ -2,10 +2,16 @@ __author__ = 'ym1ng'
 import tornado.ioloop
 import tornado.web
 
+def getKey(file = 'key.txt'):
+    with open(file, 'r') as fd:
+        key = fd.read()
+    return key
+
 
 class BaseHandler(tornado.web.RequestHandler):
     def get_current_user(self):
         return self.get_secure_cookie('user')
+
 
 class MainHandler(BaseHandler):
     @tornado.web.authenticated
@@ -20,11 +26,14 @@ class LoginHandler(BaseHandler):
     def post(self):
         self.set_secure_cookie('user',self.get_argument('name'))
 
+
 settings = {
-    'cookie_secret': '123456789',
+    'cookie_secret': getKey(),
     'login_url': '/login'
 
 }
+
+
 application = tornado.web.Application([
     (r'/', MainHandler),
     (r'/login', LoginHandler),
