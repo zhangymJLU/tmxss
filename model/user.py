@@ -6,7 +6,7 @@ import hashlib
 
 class User(object):
     def __init__(self, username, db=db):
-        self.db = db
+        self.db = db.user
         self.username = username
 
     def login(self, password):
@@ -35,7 +35,7 @@ class User(object):
 
     @classmethod
     def filter(cls, username=None, email=None, id=None, db=db):
-        username = db.find_one({'$or': [{'username': username}, {'email': email}, {'id': id}]})['username']
+        username = db.find_one({'$or': [{'username': username}, {'email': email}, {'_id': id}]})['username']
         if username:
             return cls(username=username)
         return None
