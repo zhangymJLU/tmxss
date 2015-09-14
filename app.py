@@ -3,14 +3,20 @@ import os
 import tornado.ioloop
 import tornado.web
 import ConfigParser
+import tornado.autoreload
 from model import *
 
-config = ConfigParser.ConfigParser()
+_config = ConfigParser.ConfigParser()
+_config.read('config.ini')
 
 
 class BaseHandler(tornado.web.RequestHandler):
     def get_current_user(self):
-        return self.get_secure_cookie('username')
+        username = self.get_secure_cookie('username')
+        if User.filter(username=username):
+            return True
+        else:
+            return False
 
     def get_all_input(self):
         data = {}
@@ -22,7 +28,7 @@ class BaseHandler(tornado.web.RequestHandler):
 class MainHandler(BaseHandler):
     @tornado.web.authenticated
     def get(self):
-        self.render()
+        self.render('main.html')
 
 
 class ResultListHandler(BaseHandler):
@@ -40,6 +46,10 @@ class ResultDetailHandler(BaseHandler):
 class ReceiveRequestHandler(BaseHandler):
     def get(self):
         input = self.get_all_input()
+        username = input.get('username')
+        result = Result(username=username, result=input)
+        result.save()
+        print input
 
     def post(self):
         self.get()
@@ -47,16 +57,19 @@ class ReceiveRequestHandler(BaseHandler):
 
 class LoginHandler(BaseHandler):
     def get(self):
-        self.write('login')
+        self.render('login.html')
 
     def post(self):
         input = self.get_all_input()
         username = input.get('username')
         password = input.get('password')
         user = User.filter(username=username)
-        ret = user.login(password)
+        if user:
+            ret = user.login(password)
+        else:
+            ret = None
         if ret:
-            self.set_secure_cookie('user', self.get_argument('username'))
+            self.set_secure_cookie('username', self.get_argument('username'))
             self.redirect('/')
         else:
             self.redirect('/login')
@@ -67,9 +80,9 @@ class LoginHandler(BaseHandler):
 settings = {
     "static_path": os.path.join(os.path.dirname(__file__), "static"),
     'template_path': os.path.join(os.path.dirname(__file__), "templates"),
-    'cookie_secret': config.get('tornado', 'cookie_secret'),
-    'login_url': '/login'
-
+    'cookie_secret': _config.get('tornado', 'cookie_secret'),
+    'login_url': '/login',
+    'debug': True
 }
 
 

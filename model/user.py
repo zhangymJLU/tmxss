@@ -11,7 +11,7 @@ class User(object):
 
     def login(self, password):
         username = self.username
-        password = hashlib.md5(password)
+        password = hashlib.md5(password).hexdigest()
         db = self.db
         result = db.find_one({'username': username, 'password': password})
         if result:
@@ -28,14 +28,14 @@ class User(object):
         if db.find_one({'username': username}):
             raise Exception('用户已存在')
         db.insert({'username': username, 'email': email, 'password': password, 'comment': comment})
-        db.save()
+        #db.save()
 
     def change_pass(self, ord_password, new_password):
         pass
 
     @classmethod
     def filter(cls, username=None, email=None, id=None, db=db):
-        username = db.find_one({'$or': [{'username': username}, {'email': email}, {'_id': id}]})['username']
-        if username:
-            return cls(username=username)
+        user = db.user.find_one({'$or': [{'username': username}, {'email': email}, {'_id': id}]})
+        if user and user.get('username'):
+            return cls(username=user.get('username'))
         return None

@@ -1,5 +1,5 @@
 __author__ = 'ym1ng'
-import pymongo
+import mongo
 import ConfigParser
 
 _config = ConfigParser.ConfigParser()
@@ -13,7 +13,7 @@ _password = _config.get('mongo', 'password')
 
 
 def _get_db(host=_host, port=_port, username=_username, password=_password):
-    conn = pymongo.Connection(host, port)
+    conn = mongo.pymongo.MongoClient(host, port)
     db = conn.tmxss
     if username and password:
         db.authenticate(username, password)
